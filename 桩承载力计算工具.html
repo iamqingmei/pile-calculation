@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>桩承载力计算工具</title>
+</head>
+<body>
+	<h1>桩承载力计算工具</h1>
+	<form>
+		<fieldset>
+		<table border="0">
+		<tr>
+			<td>
+				<p>
+				  <label>请输入桩径（mm）： </label>
+				  <input type = "number"
+				         id = "d"/>
+				</p>
+				<p>
+				  <label>请输入土层层数： </label>
+				  <input type = "number"
+				         id = "layer_number"
+				         onblur="input_Fs()" />
+				</p>
+				<div id = 'fs_div'></div>
+				<p>
+				  <label>请输入端阻（kPa）：</label>
+				  <input type = "number"
+				         id = "ps"/>
+				</p>
+				<p>
+				  <label>请输入桩顶高程(m): </label>
+				  <input type = "number"
+				         id = "top_height"/>
+				</p>
+			</td>
+			<td>		
+			<p>
+			  <label>&nbsp;&nbsp;&nbsp;&nbsp;请输入进入持力层深度(m)：</label>
+			  <input type = "number"
+			         id = "bottom"/>
+			</p>
+			<div id = 'height_div'></div>
+			</td>
+		</tr>
+		</table>
+		</fieldset>
+    </form>
+
+	<button type="button" onclick = "calculate()" style="font-size : 30px; ">计算</button>
+	<br>
+    ------------------------------ 结果 --------------------------
+    <table border="0">
+		<tr>
+			<td>侧阻(kPa)：<div id='sum_fs_div'></div></td>
+			<td>端阻(kPa)： <div id='sum_ps_div'></div></td>
+			<td>桩特征值(kN)：<div id='sum_total_div'></div></td>
+		</tr>
+		<tr>
+			<td>有效桩长(m): <div id='total_length_div'></div></td>
+			<td>混凝土立方量(m3): <div id='volumn_div'></div></td>
+		</tr>
+	</table>
+
+	<div id='test_div'></div>
+</body>
+
+		<script type="text/javascript">
+			
+			function input_Fs(){
+				var layer_number = document.getElementById("layer_number").value;
+
+				s = "请给每层输入侧阻（kPa）";
+	            for (i = 1; i<= layer_number; i++) {
+	               s += ("<p><label>请输入第");
+	               s += (i);
+	               s += ("层的侧阻（kPa）： </label><input type = 'number' id = 'fs_")
+	               s += (i);
+	               s += ("'/></p>");
+	            }
+	            document.getElementById("fs_div").innerHTML = s;
+
+	            s = "&nbsp;&nbsp;&nbsp;&nbsp;请从上到下输入层面高程"
+	            for (i = 1; i<= layer_number-1; i++) {
+	               s += ("<p><label>&nbsp;&nbsp;&nbsp;&nbsp;请输入第");
+	               s += (i);
+	               s += ("层的层面高程(m)： </label><input type = 'number' id = 'height_")
+	               s += (i);
+	               s += ("'/></p>");
+	            }
+
+	            document.getElementById("height_div").innerHTML = s;
+			}
+
+			function calculate(){
+				Fs =new Array();
+				layer_height = new Array();
+				d = document.getElementById("d").value / 1000;
+				Ps = document.getElementById("ps").value;
+				layer_number = document.getElementById("layer_number").value;
+				bottom = document.getElementById("bottom").value;
+				top_height = document.getElementById("top_height").value;
+
+				layer_height[0] = document.getElementById("top_height").value;
+				for (i = 1; i<= layer_number; i++) {
+					cur_fs_id = 'fs_' + i.toString();
+					Fs[i-1] = document.getElementById(cur_fs_id).value;
+				}
+				for (i = 1; i<= layer_number-1; i++) {
+					cur_height_id = 'height_' + i.toString();
+					layer_height[i] = document.getElementById(cur_height_id).value;
+				}
+
+				layer_height[layer_number] = layer_height[layer_number-1] - bottom;
+
+				sum_ps = Math.PI * ((d/2)**2) * Ps
+				document.getElementById("sum_ps_div").innerHTML = sum_ps.toFixed(3);
+
+
+				sum_fs = 0;
+				circum = d * Math.PI;
+				for (i = 0; i < layer_number; i++) {
+				    sum_fs += circum * (layer_height[i] - layer_height[i+1]) * Fs[i]
+				}
+				document.getElementById("sum_fs_div").innerHTML = sum_fs.toFixed(3);
+
+				document.getElementById("sum_total_div").innerHTML =  (sum_fs + sum_ps).toFixed(3);
+
+				total_length = layer_height[0] - layer_height[layer_number];
+				document.getElementById("total_length_div").innerHTML = total_length.toFixed(3);
+
+				document.getElementById("volumn_div").innerHTML = (total_length * ((d/2)**2) * Math.PI).toFixed(4);
+
+
+			}
+      	</script>
+
+
+</html>
